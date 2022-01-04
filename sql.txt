@@ -1,0 +1,62 @@
+CREATE DATABASE IF NOT EXISTS fulltext_db;
+
+USE fulltext_db;
+
+CREATE TABLE journals(
+     volume VARCHAR(1000),
+     name VARCHAR(1000),
+     journal VARCHAR(1000),
+     body LONGTEXT,
+     KEY(volume),
+     FULLTEXT(body)
+);
+
+CREATE PIPELINE IF NOT EXISTS journal_pipeline AS
+LOAD DATA S3 'zhou-fts/*json'
+CONFIG '{
+   "region" : "us-west-1"}'
+INTO TABLE journals
+FORMAT JSON
+( volume <- volume,
+  name <- name,
+  journal <- journal,
+  body <- body
+);
+
+START PIPELINE journal_pipeline;
+
+SELECT COUNT(*) FROM journals;
+
+SELECT *
+FROM journals
+WHERE MATCH(body) AGAINST ('optometry');
+
+SELECT *
+FROM journals
+WHERE MATCH(body) AGAINST ('dentistry AND cavities');
+
+SELECT *
+FROM journals
+WHERE MATCH(body) AGAINST ('+dentistry +cavities');
+
+SELECT *
+FROM journals
+WHERE MATCH(body) AGAINST ('optometry -contacts');
+
+SELECT *
+FROM journals
+WHERE MATCH(body) AGAINST ('dentist*');
+
+SELECT *
+FROM journals
+WHERE MATCH(body) AGAINST ('pediatrician');
+
+SELECT MATCH(body) AGAINST ('pediatrician') AS score, *
+FROM journals
+WHERE MATCH(body) AGAINST ('pediatrician')
+ORDER BY score DESC;
+
+SELECT HIGHLIGHT(body) AGAINST ('pediatrician')
+FROM journals
+WHERE MATCH(body) AGAINST ('pediatrician');
+
