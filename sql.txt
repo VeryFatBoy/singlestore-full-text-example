@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS fulltext_db;
 
 USE fulltext_db;
 
-CREATE TABLE journals(
+CREATE TABLE journals (
      volume VARCHAR(1000),
      name VARCHAR(1000),
      journal VARCHAR(1000),
