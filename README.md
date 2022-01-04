@@ -1,0 +1,1 @@
+# singlestore-full-text-example
